@@ -9,7 +9,6 @@ from flask import request
 from flask import session
 from flask import escape
 from werkzeug.utils import secure_filename
-from Crypto.Cipher import AES    # 请安装 Crypto
 
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -265,46 +264,6 @@ def post_sign():
         return jsonify({"code": 10101, "message": "request method error"})
 
 
-############ AES加密的接口 #############
-
-BS = 16
-def unpad(s): return s[0: - ord(s[-1])]
-
-
-def decryptBase64(src):
-    return base64.urlsafe_b64decode(src)
-
-
-def decryptAES(src):
-    """
-    解析AES密文
-    """
-    src = decryptBase64(src)
-    key = b'W7v4D60fds2Cmk2U'
-    iv = b"1172311105789011"
-    cryptor = AES.new(key, AES.MODE_CBC, iv)
-    text = cryptor.decrypt(src).decode()
-    return unpad(text)
-
-
-@app.route('/aes/', methods=['GET', 'POST'])
-def post_aes():
-    if request.method == 'POST':
-        data = request.form.get('data')  # AES加密的数据
-
-        if data is None or data == "":
-           return jsonify({"code": 10102, "message": "data is None"})
-
-        # 解密
-        decode = decryptAES(data)
-        # 转化为字典
-        dict_data = json.loads(decode)
-        return jsonify({"code": 10200, "message": "success", "data": dict_data})
-
-    else:
-        return jsonify({"code": 10101, "message": "request method error"})
-
-############ end #############
 
 
 
